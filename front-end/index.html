@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Achei no Campus — arquivo colaborativo de objetos perdidos e encontrados.">
+  <title>Achei no Campus | Arquivo de objetos</title>
+
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/script.js" defer></script>
+</head>
+
+<body id="top">
+
+  <header class="header">
+    <div class="container header-content">
+
+      <a href="index.html" class="brand" aria-label="Achei no Campus - Início">
+        <span class="brand-mark">A<span>.</span></span>
+        <span class="brand-name">achei <span>no campus</span></span>
+      </a>
+
+      <button
+        class="menu-toggle"
+        id="menuToggle"
+        aria-label="Abrir menu"
+        aria-expanded="false"
+        aria-controls="mainNav"
+      >
+        <span></span>
+        <span></span>
+      </button>
+
+      <nav class="nav" id="mainNav">
+        <a href="#objetos" class="nav-link active">Arquivo</a>
+        <a href="#como-funciona" class="nav-link">Como funciona</a>
+        <a href="#sobre" class="nav-link">Sobre</a>
+
+        <div class="nav-actions">
+          <a href="pages/login.html" class="nav-login">Entrar</a>
+          <a href="pages/cadastrar-objeto.html" class="nav-register">
+            + Registrar objeto
+          </a>
+        </div>
+      </nav>
+
+    </div>
+  </header>
+
+  <main>
+
+    <!-- HERO -->
+
+    <section class="hero">
+      <div class="container hero-content">
+
+        <div class="hero-topline">
+          <span>ARQUIVO COLABORATIVO</span>
+          <span>COMUNIDADE UNIVERSITÁRIA / 01</span>
+        </div>
+
+        <div class="hero-grid">
+
+          <div class="hero-title-wrap">
+            <span class="hero-kicker">PERDIDOS &amp; ENCONTRADOS</span>
+
+            <h1>
+              Objetos têm<br>
+              <em>histórias.</em>
+            </h1>
+          </div>
+
+          <div class="hero-description">
+            <p>
+              Um arquivo colaborativo de objetos perdidos e encontrados
+              dentro do campus. Procure o que perdeu. Registre o que encontrou.
+            </p>
+
+            <a href="#objetos" class="hero-link">
+              EXPLORAR O ARQUIVO <span>↓</span>
+            </a>
+          </div>
+
+        </div>
+
+        <div class="hero-bottomline">
+          <span>UM PROJETO DA COMUNIDADE ACADÊMICA</span>
+          <span>LOCALIZE · REGISTRE · DEVOLVA</span>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- BUSCA -->
+
+    <section class="search-section" id="busca">
+      <div class="container">
+
+        <div class="search-heading">
+          <div>
+            <span class="section-kicker">PESQUISA / 02</span>
+            <h2>O que você procura?</h2>
+          </div>
+
+          <p>Nome, categoria, descrição ou local.</p>
+        </div>
+
+        <form class="search-form" id="searchForm">
+
+          <label class="search-input-wrap" for="searchInput">
+            <span aria-hidden="true">⌕</span>
+
+            <input
+              type="search"
+              id="searchInput"
+              placeholder="Ex.: carteira, fone, biblioteca..."
+              autocomplete="off"
+            >
+          </label>
+
+          <button type="submit" class="search-button">
+            BUSCAR <span>↗</span>
+          </button>
+
+        </form>
+
+        <div class="quick-categories">
+          <span class="quick-label">ATALHOS</span>
+
+          <button class="quick-category" data-category="Eletrônicos">
+            Eletrônicos
+          </button>
+
+          <button class="quick-category" data-category="Documentos">
+            Documentos
+          </button>
+
+          <button class="quick-category" data-category="Acessórios">
+            Acessórios
+          </button>
+
+          <button class="quick-category" data-category="Material escolar">
+            Material escolar
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ARQUIVO DE OBJETOS -->
+
+    <section class="items-section section" id="objetos">
+      <div class="container">
+
+        <div class="section-heading">
+
+          <div>
+            <span class="section-kicker">REGISTROS / 03</span>
+
+            <h2>
+              Arquivo <em>aberto.</em>
+            </h2>
+
+            <p>
+              Objetos recentemente registrados pela comunidade.
+            </p>
+          </div>
+
+          <a href="pages/objetos.html" class="text-link">
+            ARQUIVO COMPLETO <span>↗</span>
+          </a>
+
+        </div>
+
+        <!-- FILTROS -->
+
+        <div class="items-toolbar">
+
+          <div class="filter-tabs" role="group" aria-label="Filtrar objetos">
+
+            <button class="filter-tab active" data-filter="todos">
+              Todos
+            </button>
+
+            <button class="filter-tab" data-filter="perdido">
+              Perdidos
+            </button>
+
+            <button class="filter-tab" data-filter="encontrado">
+              Encontrados
+            </button>
+
+          </div>
+
+          <label class="category-select-wrap" for="categoryFilter">
+
+            <span>CATEGORIA</span>
+
+            <select id="categoryFilter">
+              <option value="todas">Todas</option>
+              <option value="Eletrônicos">Eletrônicos</option>
+              <option value="Documentos">Documentos</option>
+              <option value="Acessórios">Acessórios</option>
+              <option value="Material escolar">Material escolar</option>
+              <option value="Outros">Outros</option>
+            </select>
+
+          </label>
+
+        </div>
+
+        <!-- CABEÇALHO DO CATÁLOGO -->
+
+        <div class="catalog-labels" aria-hidden="true">
+          <span>REGISTRO / OBJETO</span>
+          <span>LOCAL</span>
+          <span>SITUAÇÃO</span>
+          <span>DATA</span>
+        </div>
+
+        <!-- OS OBJETOS SERÃO INSERIDOS PELO JAVASCRIPT -->
+
+        <div class="items-grid" id="itemsGrid"></div>
+
+        <!-- ESTADO VAZIO -->
+
+        <div class="empty-state hidden" id="emptyState">
+
+          <span class="empty-state-icon">
+            ARQUIVO / VAZIO
+          </span>
+
+          <h3>Nenhum registro encontrado.</h3>
+
+          <p>
+            Tente alterar a busca ou remover os filtros.
+          </p>
+
+          <button class="clear-filters" id="clearFilters">
+            LIMPAR FILTROS ↗
+          </button>
+
+        </div>
+
+        <div class="catalog-footer">
+          <span>FIM DOS REGISTROS EXIBIDOS</span>
+          <span>ACHADOS &amp; PERDIDOS / CAMPUS</span>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- COMO FUNCIONA -->
+
+    <section class="how-section section" id="como-funciona">
+      <div class="container">
+
+        <div class="section-heading">
+
+          <div>
+            <span class="section-kicker">PROCESSO / 04</span>
+            <h2>Como funciona</h2>
+          </div>
+
+          <p>Uma rede simples de colaboração.</p>
+
+        </div>
+
+        <div class="steps-grid">
+
+          <article class="step-card">
+            <span class="step-number">01</span>
+
+            <h3>Procure</h3>
+
+            <p>
+              Pesquise no arquivo por objetos perdidos ou encontrados
+              dentro do campus.
+            </p>
+          </article>
+
+          <article class="step-card">
+            <span class="step-number">02</span>
+
+            <h3>Registre</h3>
+
+            <p>
+              Perdeu ou encontrou algo? Registre o objeto para
+              ajudar outras pessoas.
+            </p>
+          </article>
+
+          <article class="step-card">
+            <span class="step-number">03</span>
+
+            <h3>Reconecte</h3>
+
+            <p>
+              Entre em contato e confirme as informações para
+              devolver o objeto ao dono.
+            </p>
+          </article>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- CONTRIBUA -->
+
+    <section class="cta-section" id="sobre">
+      <div class="container cta-content">
+
+        <div>
+          <span class="section-kicker">CONTRIBUA / 05</span>
+
+          <h2>
+            Encontrou algo<br>
+            <em>pelo campus?</em>
+          </h2>
+
+          <p>
+            Uma informação simples pode ajudar alguém a recuperar
+            algo importante.
+          </p>
+        </div>
+
+        <a href="pages/cadastrar-objeto.html" class="cta-link">
+          REGISTRAR OBJETO <span>↗</span>
+        </a>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- RODAPÉ -->
+
+  <footer class="footer">
+    <div class="container footer-content">
+
+      <a href="index.html" class="footer-brand">
+        achei <span>no campus.</span>
+      </a>
+
+      <p>
+        Uma iniciativa para aproximar pessoas e ajudar objetos
+        a encontrarem seus donos.
+      </p>
+
+      <span class="footer-copy">
+        © <span id="currentYear"></span> ACHEI NO CAMPUS
+      </span>
+
+      <a class="back-top" href="#top">
+        VOLTAR AO TOPO ↑
+      </a>
+
+    </div>
+  </footer>
+
+</body>
+</html>
