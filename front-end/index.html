@@ -53,13 +53,14 @@
     <article class="record">
       <button type="button" class="record-open">
         <span class="record-header"><span class="record-number eyebrow"></span><span class="record-type eyebrow"></span></span>
-        <span class="record-media"><span class="no-photo eyebrow">Sem foto</span><img alt="" hidden></span>
+        <span class="record-media"><span class="no-photo eyebrow">Sem foto</span><img alt="" loading="lazy" hidden></span>
         <span class="record-body"><span class="record-title"></span><span class="record-meta"><span><small class="eyebrow">Local</small><span class="record-location"></span></span><span><small class="eyebrow">Data</small><time class="record-date"></time></span></span></span>
       </button>
     </article>
   </template>
   <dialog id="record-details" aria-labelledby="details-title">
     <p id="details-number" class="eyebrow accent"></p><h2 id="details-title"></h2>
+    <img id="details-photo" class="details-photo" alt="Foto do objeto" hidden>
     <p id="details-description"></p>
     <dl class="details-meta"><dt>Tipo</dt><dd id="details-type"></dd><dt>Categoria</dt><dd id="details-category"></dd><dt>Local</dt><dd id="details-location"></dd><dt>Data</dt><dd id="details-date"></dd></dl>
     <form method="dialog"><button class="button" autofocus>Fechar</button></form>

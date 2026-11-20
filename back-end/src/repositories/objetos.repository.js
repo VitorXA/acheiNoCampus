@@ -1,7 +1,16 @@
 import { obterPool } from '../config/database.js';
 
+export async function inserirObjeto({ titulo, descricao, cor, tipo, data, idUsuario, idCategoria, idLocal }, fotoChave = null) {
+  const { rows } = await obterPool().query(`
+    INSERT INTO public.objetos (titulo, descricao, cor, tipo, data_ocorrencia, id_usuario, id_categoria, id_local, foto_chave)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+    RETURNING id_objeto, status
+  `, [titulo, descricao, cor, tipo, data, idUsuario, idCategoria, idLocal, fotoChave]);
+  return rows[0];
+}
+
 const consultaObjetos = `
-  SELECT o.id_objeto, o.titulo, o.descricao, o.cor, o.tipo, o.status,
+  SELECT o.id_objeto, o.titulo, o.descricao, o.cor, o.tipo, o.status, o.foto_chave,
          to_char(o.data_ocorrencia, 'YYYY-MM-DD') AS data_ocorrencia,
          o.id_categoria, c.nome AS categoria, o.id_local, l.nome AS local, l.bloco
   FROM public.objetos AS o

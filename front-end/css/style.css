@@ -39,6 +39,7 @@ h2 { font-size: 2rem; font-weight: 600; }
 .main-nav { display: flex; align-items: center; gap: 32px; font-size: .875rem; font-weight: 600; }
 .main-nav a[aria-current="page"]:not(.nav-register), .main-nav a:hover { text-decoration: underline; text-underline-offset: 8px; }
 .nav-account { padding-left: 32px; border-left: 1px solid #ffffff48; }
+button.nav-account { background: transparent; border-block: 0; border-right: 0; border-radius: 0; padding-right: 0; }
 .nav-register { display: inline-flex; align-items: center; gap: 10px; padding: 8px 20px; border: 1px solid #ffffffa0; border-radius: 4px; }
 .nav-register span { font-size: 1.1rem; }
 .menu-button { display: none; border: 1px solid #ffffffa0; border-radius: 4px; background: transparent; padding: 7px 13px; }
@@ -104,6 +105,7 @@ fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
 dialog { width: min(480px, calc(100% - 32px)); max-height: calc(100% - 32px); overflow: auto; padding: 30px; border: 1px solid var(--line); color: var(--ink); }
 dialog::backdrop { background: #233b4fb0; }
 dialog h2 { margin: 8px 0 12px; }
+.details-photo { width: 100%; max-height: 280px; object-fit: contain; background: var(--paper); margin-bottom: 12px; }
 .details-meta, .site-footer dl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px 20px; margin-top: 14px; }
 
 .how-title { max-width: 920px; }

@@ -11,6 +11,6 @@ export function tratarErro(erro, _req, res, next) {
     return res.status(413).json({ mensagem: 'Corpo da requisição muito grande.' });
   }
 
-  console.error(erro);
+  console.error('Falha na API:', erro.code ?? erro.name);
   return res.status(500).json({ mensagem: 'Erro interno do servidor.' });
 }

@@ -4,6 +4,28 @@ import { inteiroPositivo } from '../utils/validators.js';
 const TIPOS = ['perdido', 'encontrado'];
 const STATUS = ['pendente', 'devolvido'];
 
+export function validarNovaFicha(body, idUsuario) {
+  const { tipo, data_ocorrencia, id_categoria, id_local } = body ?? {};
+  const texto = (valor, max) => typeof valor === 'string' && valor.length <= max && !valor.includes('\0')
+    ? valor.trim()
+    : null;
+  const titulo = texto(body?.titulo, 45);
+  const cor = texto(body?.cor ?? '', 45);
+  const descricao = texto(body?.descricao ?? '', 2000);
+  const idCategoria = inteiroPositivo(id_categoria);
+  const idLocal = inteiroPositivo(id_local);
+  const data = typeof data_ocorrencia === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(data_ocorrencia)
+    ? new Date(data_ocorrencia + 'T00:00:00Z')
+    : null;
+  const dataValida = data && !Number.isNaN(data.getTime())
+    && data.getUTCFullYear() >= 1 && data.toISOString().slice(0, 10) === data_ocorrencia;
+
+  if (!titulo || cor === null || descricao === null || !TIPOS.includes(tipo) || !dataValida || !idCategoria || !idLocal) {
+    return null;
+  }
+  return { titulo, cor, descricao, tipo, data: data_ocorrencia, idUsuario, idCategoria, idLocal };
+}
+
 export async function consultarObjetos(query) {
   const { busca, tipo, status, id_categoria, id_local, pagina = '1', limite = '50' } = query;
 

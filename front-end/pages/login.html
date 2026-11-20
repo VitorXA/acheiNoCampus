@@ -36,8 +36,8 @@
       </div>
       <form id="account-form" method="post">
         <label class="field" id="account-name" hidden><span class="eyebrow">Nome</span><input name="nome" maxlength="45" autocomplete="name" disabled></label>
-        <label class="field"><span class="eyebrow">E-mail</span><input name="email" type="email" placeholder="voce@email.com" autocomplete="email" required></label>
-        <label class="field"><span class="eyebrow">Senha</span><input name="senha" type="password" placeholder="Sua senha" autocomplete="current-password" required></label>
+        <label class="field"><span class="eyebrow">E-mail</span><input name="email" type="email" maxlength="45" placeholder="voce@email.com" autocomplete="email" required></label>
+        <label class="field"><span class="eyebrow">Senha</span><input name="senha" type="password" maxlength="128" placeholder="Sua senha" autocomplete="current-password" required></label>
         <button class="button" id="account-submit" type="submit">Entrar</button>
         <p class="form-feedback" id="account-feedback" role="status"></p>
       </form>

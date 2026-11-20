@@ -4,9 +4,28 @@ const origemAPI = location.protocol === "file:" ||
   : location.origin;
 
 async function consultarAPI(caminho, signal) {
-  const resposta = await fetch(origemAPI + "/api" + caminho, { signal });
+  const resposta = await fetch(origemAPI + "/api" + caminho, { signal, credentials: "include" });
   if (!resposta.ok) throw new Error("Falha na consulta à API.");
   return resposta.json();
+}
+
+async function enviarAPI(caminho, dados) {
+  const multipart = dados instanceof FormData;
+  const resposta = await fetch(origemAPI + "/api" + caminho, {
+    method: "POST",
+    credentials: "include",
+    headers: multipart ? { "X-Achei-Request": "1" } : { "X-Achei-Request": "1", "Content-Type": "application/json" },
+    body: multipart ? dados : JSON.stringify(dados)
+  });
+  const resultado = await resposta.json().catch(() => ({}));
+  if (!resposta.ok) {
+    const erro = new Error(resultado.mensagem || (resposta.status === 413
+      ? "A foto deve ter até 4 MB."
+      : "Não foi possível concluir a operação."));
+    erro.status = resposta.status;
+    throw erro;
+  }
+  return resultado;
 }
 
 
@@ -31,6 +50,35 @@ function preencherOpcoes(select, opcoes, chaveId) {
   select.append(...opcoes.map((valor) => new Option(valor.nome || "Sem nome", valor[chaveId])));
 }
 
+function nomeLocal(nome, bloco) {
+  if (!nome) return bloco || "—";
+  return bloco && bloco !== nome ? nome + " — " + bloco : nome;
+}
+
+function agruparLocais(select, locais) {
+  const grupos = new Map();
+  for (const local of locais) {
+    const bloco = local.bloco?.trim() || "";
+    if (!grupos.has(bloco)) grupos.set(bloco, []);
+    grupos.get(bloco).push(local);
+  }
+
+  const blocos = [...grupos.keys()].filter(Boolean).sort((a, b) => a.localeCompare(b, "pt-BR"));
+  if (grupos.has("")) blocos.push("");
+
+  for (const bloco of blocos) {
+    const grupo = document.createElement("optgroup");
+    grupo.label = bloco || "Sem bloco definido";
+    for (const local of grupos.get(bloco)) {
+      const nome = local.nome || "Local sem nome";
+      const opcao = new Option(bloco && nome === bloco ? "Área geral do bloco" : nome, local.id_local);
+      opcao.dataset.local = nomeLocal(nome, bloco);
+      grupo.append(opcao);
+    }
+    select.append(grupo);
+  }
+}
+
 function iniciarMenu() {
   const botao = document.querySelector(".menu-button");
   const menu = document.querySelector(".main-nav");
@@ -49,6 +97,31 @@ function iniciarMenu() {
       botao.focus();
     }
   });
+}
+
+async function mostrarAcaoSessao() {
+  try {
+    const { autenticado } = await consultarAPI("/auth/session");
+    if (!autenticado) return;
+    const entrar = document.querySelector(".nav-account");
+    const sair = document.createElement("button");
+    sair.type = "button";
+    sair.className = "nav-account";
+    sair.textContent = "Sair";
+    sair.addEventListener("click", async () => {
+      sair.disabled = true;
+      try {
+        await enviarAPI("/auth/logout", {});
+        location.href = entrar.href;
+      } catch {
+        sair.textContent = "Tentar sair novamente";
+        sair.disabled = false;
+      }
+    });
+    entrar.replaceWith(sair);
+  } catch {
+    // A navegação continua disponível quando não é possível consultar a sessão.
+  }
 }
 
 function iniciarArquivo(arquivo) {
@@ -87,6 +160,8 @@ function iniciarArquivo(arquivo) {
     const campos = dialogo.querySelector(".details-meta");
     const titulo = document.getElementById("details-title");
     const descricao = document.getElementById("details-description");
+    const foto = document.getElementById("details-photo");
+    mostrarFoto(foto);
     document.getElementById("details-number").textContent = numeroFicha(id);
     titulo.textContent = "Carregando ficha…";
     descricao.textContent = "";
@@ -98,9 +173,10 @@ function iniciarArquivo(arquivo) {
       if (controle.signal.aborted) return;
       titulo.textContent = registro.titulo || "Objeto sem título";
       descricao.textContent = registro.descricao || "Sem descrição.";
+      mostrarFoto(foto, registro.foto_url);
       document.getElementById("details-type").textContent = tipoTexto(registro.tipo);
       document.getElementById("details-category").textContent = registro.categoria || "—";
-      document.getElementById("details-location").textContent = registro.local || "—";
+      document.getElementById("details-location").textContent = nomeLocal(registro.local, registro.bloco);
       document.getElementById("details-date").textContent = formatarData(registro.data_ocorrencia);
       campos.hidden = false;
     } catch {
@@ -116,7 +192,8 @@ function iniciarArquivo(arquivo) {
     const titulo = registro.titulo || "Objeto sem título";
     ficha.querySelector(".record-number").textContent = numeroFicha(registro.id_objeto);
     ficha.querySelector(".record-title").textContent = titulo;
-    ficha.querySelector(".record-location").textContent = registro.local || "—";
+    ficha.querySelector(".record-location").textContent = nomeLocal(registro.local, registro.bloco);
+    mostrarFoto(ficha.querySelector("img"), registro.foto_url, ficha.querySelector(".no-photo"));
     preencherTipo(ficha.querySelector(".record-type"), registro.tipo);
     const data = ficha.querySelector("time");
     if (registro.data_ocorrencia) data.dateTime = registro.data_ocorrencia;
@@ -124,6 +201,17 @@ function iniciarArquivo(arquivo) {
     botao.setAttribute("aria-label", "Ver ficha: " + titulo);
     botao.addEventListener("click", () => abrirDetalhes(registro.id_objeto));
     return ficha;
+  }
+
+  function mostrarFoto(imagem, url, semFoto) {
+    imagem.hidden = !url;
+    if (semFoto) semFoto.hidden = Boolean(url);
+    imagem.onerror = () => {
+      imagem.hidden = true;
+      if (semFoto) semFoto.hidden = false;
+    };
+    if (url) imagem.src = url;
+    else imagem.removeAttribute("src");
   }
 
   function selecionarCategoria(id) {
@@ -147,7 +235,7 @@ function iniciarArquivo(arquivo) {
       }
       if (!categorias.value.length) categoriasFiltro.textContent = "Nenhuma categoria cadastrada.";
     }
-    if (locais.status === "fulfilled") preencherOpcoes(local, locais.value, "id_local");
+    if (locais.status === "fulfilled") agruparLocais(local, locais.value);
     if (categorias.status === "rejected" || locais.status === "rejected") {
       avisoFiltros.textContent = "Alguns filtros não puderam ser carregados.";
     }
@@ -236,15 +324,29 @@ function iniciarConta(formulario) {
     nome.disabled = !cadastro;
     nome.required = cadastro;
     senha.autocomplete = cadastro ? "new-password" : "current-password";
+    senha.minLength = cadastro ? 8 : 1;
     senha.value = "";
     botao.textContent = cadastro ? "Criar conta" : "Entrar";
     aviso.textContent = "";
   }));
 
-  formulario.addEventListener("submit", (event) => {
+  formulario.addEventListener("submit", async (event) => {
     event.preventDefault();
-    senha.value = "";
-    aviso.textContent = "A área de conta ainda não está conectada ao servidor.";
+    if (botao.disabled) return;
+    botao.disabled = true;
+    opcoes.forEach((opcao) => { opcao.disabled = true; });
+    aviso.textContent = "Aguarde…";
+    const cadastro = !nome.disabled;
+    try {
+      await enviarAPI(cadastro ? "/auth/register" : "/auth/login", Object.fromEntries(new FormData(formulario)));
+      senha.value = "";
+      location.href = "cadastrar-objeto.html";
+    } catch (erro) {
+      aviso.textContent = erro.status ? erro.message : "Não foi possível acessar a API. Tente novamente.";
+    } finally {
+      botao.disabled = false;
+      opcoes.forEach((opcao) => { opcao.disabled = false; });
+    }
   });
 }
 
@@ -255,6 +357,7 @@ function iniciarRegistro(formulario) {
   const semFoto = previa.querySelector(".no-photo");
   const aviso = document.getElementById("register-feedback");
   const dicaFoto = document.getElementById("photo-hint");
+  const dicaFotoOriginal = dicaFoto.textContent;
   let fotoUrl;
 
   const botaoPublicar = formulario.querySelector('[type="submit"]');
@@ -267,7 +370,7 @@ function iniciarRegistro(formulario) {
     campos.categoria.append(new Option("Selecione uma categoria", ""));
     campos.local.append(new Option("Selecione um local", ""));
     preencherOpcoes(campos.categoria, categorias, "id_categoria");
-    preencherOpcoes(campos.local, locais, "id_local");
+    agruparLocais(campos.local, locais);
     campos.categoria.disabled = categorias.length === 0;
     campos.local.disabled = locais.length === 0;
     botaoPublicar.disabled = !categorias.length || !locais.length;
@@ -288,7 +391,7 @@ function iniciarRegistro(formulario) {
   function atualizar() {
     preencherTipo(previa.querySelector(".record-type"), campos.tipo.value);
     previa.querySelector(".record-title").textContent = campos.titulo.value.trim() || "Nome do objeto";
-    previa.querySelector('[data-preview="local"]').textContent = campos.local.value ? campos.local.selectedOptions[0].textContent : "—";
+    previa.querySelector('[data-preview="local"]').textContent = campos.local.selectedOptions[0]?.dataset.local ?? "—";
     previa.querySelector('[data-preview="data"]').textContent = formatarData(campos.data.value);
     previa.querySelector('[data-preview="categoria"]').textContent = campos.categoria.value ? campos.categoria.selectedOptions[0].textContent : "—";
     previa.querySelector('[data-preview="cor"]').textContent = campos.cor.value.trim() || "—";
@@ -300,16 +403,16 @@ function iniciarRegistro(formulario) {
     imagem.removeAttribute("src");
     imagem.hidden = true;
     semFoto.hidden = false;
-    dicaFoto.textContent = "JPG ou PNG, até 5 MB.";
+    dicaFoto.textContent = dicaFotoOriginal;
   }
 
   campos.foto.addEventListener("change", () => {
     limparFoto();
     const arquivo = campos.foto.files[0];
     if (!arquivo) return;
-    if (!["image/jpeg", "image/png"].includes(arquivo.type) || arquivo.size > 5 * 1024 * 1024) {
+    if (!["image/jpeg", "image/png"].includes(arquivo.type) || !arquivo.size || arquivo.size > 4 * 1024 * 1024) {
       campos.foto.value = "";
-      aviso.textContent = "Escolha uma imagem JPG ou PNG de até 5 MB.";
+      aviso.textContent = "Escolha uma imagem JPG ou PNG de até 4 MB.";
       return;
     }
     fotoUrl = URL.createObjectURL(arquivo);
@@ -326,9 +429,42 @@ function iniciarRegistro(formulario) {
   });
 
   formulario.addEventListener("input", atualizar);
-  formulario.addEventListener("submit", (event) => {
+  formulario.addEventListener("submit", async (event) => {
     event.preventDefault();
-    aviso.textContent = "Prévia pronta. A publicação será disponibilizada quando a API estiver integrada.";
+    if (botaoPublicar.disabled) return;
+    botaoPublicar.disabled = true;
+    aviso.textContent = "Publicando ficha…";
+    try {
+      const ficha = {
+        titulo: campos.titulo.value,
+        descricao: campos.descricao.value,
+        cor: campos.cor.value,
+        tipo: campos.tipo.value,
+        data_ocorrencia: campos.data.value,
+        id_categoria: campos.categoria.value,
+        id_local: campos.local.value
+      };
+      const foto = campos.foto.files[0];
+      if (foto) {
+        const formulario = new FormData();
+        for (const [campo, valor] of Object.entries(ficha)) formulario.set(campo, valor);
+        formulario.set("foto", foto);
+        await enviarAPI("/objetos", formulario);
+      } else {
+        await enviarAPI("/objetos", ficha);
+      }
+      location.href = "../index.html";
+    } catch (erro) {
+      if (erro.status === 401) {
+        const link = document.createElement("a");
+        link.href = "login.html";
+        link.textContent = "Entrar ou criar conta";
+        aviso.replaceChildren("Entre na sua conta para publicar. ", link);
+      } else {
+        aviso.textContent = erro.status ? erro.message : "Não foi possível publicar. Tente novamente.";
+      }
+      botaoPublicar.disabled = false;
+    }
   });
   atualizar();
 }
@@ -337,6 +473,7 @@ document.querySelectorAll("[data-year]").forEach((elemento) => {
   elemento.textContent = new Date().getFullYear();
 });
 iniciarMenu();
+mostrarAcaoSessao();
 
 const arquivo = document.getElementById("archive");
 const conta = document.getElementById("account-form");
