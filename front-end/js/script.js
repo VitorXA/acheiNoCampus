@@ -1,335 +1,346 @@
-/* =========================================
-   ACHEI NO CAMPUS
-   Interações da página inicial
-========================================= */
+const origemAPI = location.protocol === "file:" ||
+    (["localhost", "127.0.0.1"].includes(location.hostname) && location.port === "5500")
+  ? "http://127.0.0.1:3000"
+  : location.origin;
 
-// Dados fictícios para testar o frontend.
-// Depois serão substituídos pelos dados da API.
+async function consultarAPI(caminho, signal) {
+  const resposta = await fetch(origemAPI + "/api" + caminho, { signal });
+  if (!resposta.ok) throw new Error("Falha na consulta à API.");
+  return resposta.json();
+}
 
-const objetos = [
-  {
-    id: 1,
-    titulo: "Fone de ouvido Bluetooth",
-    categoria: "Eletrônicos",
-    tipo: "perdido",
-    descricao: "Fone sem fio preto, guardado em um estojo pequeno.",
-    local: "Bloco de Engenharia",
-    data: "2026-10-29",
-    emoji: "🎧",
-    cor: "#e9e3ff"
-  },
-  {
-    id: 2,
-    titulo: "Carteira marrom",
-    categoria: "Acessórios",
-    tipo: "encontrado",
-    descricao: "Carteira de couro marrom encontrada próxima à cantina.",
-    local: "Cantina principal",
-    data: "2026-10-30",
-    emoji: "👛",
-    cor: "#f8e9d8"
-  },
-  {
-    id: 3,
-    titulo: "Caderno universitário",
-    categoria: "Material escolar",
-    tipo: "perdido",
-    descricao: "Caderno azul com anotações de cálculo.",
-    local: "Biblioteca",
-    data: "2026-10-28",
-    emoji: "📘",
-    cor: "#dfeeff"
-  },
-  {
-    id: 4,
-    titulo: "Chave com chaveiro",
-    categoria: "Acessórios",
-    tipo: "encontrado",
-    descricao: "Uma chave com chaveiro de estrela.",
-    local: "Estacionamento",
-    data: "2026-10-31",
-    emoji: "🔑",
-    cor: "#fff1cb"
-  },
-  {
-    id: 5,
-    titulo: "Calculadora científica",
-    categoria: "Eletrônicos",
-    tipo: "perdido",
-    descricao: "Calculadora científica preta, usada em aulas de matemática.",
-    local: "Bloco de Matemática",
-    data: "2026-10-27",
-    emoji: "🧮",
-    cor: "#e5e8ef"
-  },
-  {
-    id: 6,
-    titulo: "Garrafa de água",
-    categoria: "Outros",
-    tipo: "encontrado",
-    descricao: "Garrafa de água reutilizável de cor lilás.",
-    local: "Quadra esportiva",
-    data: "2026-10-31",
-    emoji: "🧴",
-    cor: "#f0e3ff"
-  }
-];
 
-// Estado dos filtros
-let filtroTipo = "todos";
-let filtroCategoria = "todas";
-let termoBusca = "";
+const formatadorData = new Intl.DateTimeFormat("pt-BR", {
+  day: "2-digit", month: "short", year: "numeric", timeZone: "UTC"
+});
 
-// Elementos da página
-const itemsGrid = document.getElementById("itemsGrid");
-const emptyState = document.getElementById("emptyState");
-const searchForm = document.getElementById("searchForm");
-const searchInput = document.getElementById("searchInput");
-const categoryFilter = document.getElementById("categoryFilter");
-const filterTabs = document.querySelectorAll(".filter-tab");
-const quickCategories = document.querySelectorAll(".quick-category");
-const clearFiltersButton = document.getElementById("clearFilters");
-
-// Menu mobile
-const menuToggle = document.getElementById("menuToggle");
-const mainNav = document.getElementById("mainNav");
-
-// Formata uma data para o padrão brasileiro
 function formatarData(data) {
-  const [ano, mes, dia] = data.split("-");
-
-  return `${dia}/${mes}/${ano}`;
+  return data ? formatadorData.format(new Date(data + "T00:00:00Z")).replace(/\.| de /g, " ").replace(/\s+/g, " ").trim() : "—";
 }
 
-// Cria o card HTML de um objeto
-function criarCard(objeto) {
-  const statusTexto =
-    objeto.tipo === "perdido" ? "Perdido" : "Encontrado";
-
-  return `
-    <article class="item-card">
-
-      <div
-        class="item-image"
-        style="background-color: ${objeto.cor}"
-      >
-        <span class="item-status ${objeto.tipo}">
-          ${statusTexto}
-        </span>
-
-        <span class="item-image-emoji" aria-hidden="true">
-          ${objeto.emoji}
-        </span>
-      </div>
-
-      <div class="item-card-content">
-
-        <span class="item-category">
-          ${objeto.categoria}
-        </span>
-
-        <h3>${objeto.titulo}</h3>
-
-        <p class="item-description">
-          ${objeto.descricao}
-        </p>
-
-        <div class="item-meta">
-          <span>
-            <span aria-hidden="true">⌖</span>
-            ${objeto.local}
-          </span>
-        </div>
-
-        <div class="item-card-footer">
-          <span class="item-date">
-            ${formatarData(objeto.data)}
-          </span>
-
-          <button
-            class="item-details-button"
-            type="button"
-            data-item-id="${objeto.id}"
-          >
-            Ver detalhes →
-          </button>
-        </div>
-
-      </div>
-    </article>
-  `;
+function tipoTexto(tipo) {
+  return tipo === "perdido" ? "Perdido" : "Encontrado";
 }
 
-// Aplica os filtros à lista de objetos
-function filtrarObjetos() {
-  return objetos.filter((objeto) => {
-    const correspondeTipo =
-      filtroTipo === "todos" || objeto.tipo === filtroTipo;
-
-    const correspondeCategoria =
-      filtroCategoria === "todas" ||
-      objeto.categoria === filtroCategoria;
-
-    const textoObjeto = `
-      ${objeto.titulo}
-      ${objeto.categoria}
-      ${objeto.descricao}
-      ${objeto.local}
-      ${objeto.tipo}
-    `.toLowerCase();
-
-    const correspondeBusca =
-      textoObjeto.includes(termoBusca.toLowerCase());
-
-    return (
-      correspondeTipo &&
-      correspondeCategoria &&
-      correspondeBusca
-    );
-  });
+function preencherTipo(elemento, tipo) {
+  elemento.dataset.type = tipo;
+  elemento.textContent = tipoTexto(tipo);
 }
 
-// Renderiza os cards na tela
-function renderizarObjetos() {
-  const objetosFiltrados = filtrarObjetos();
+function preencherOpcoes(select, opcoes, chaveId) {
+  select.append(...opcoes.map((valor) => new Option(valor.nome || "Sem nome", valor[chaveId])));
+}
 
-  itemsGrid.innerHTML = objetosFiltrados
-    .map(criarCard)
-    .join("");
+function iniciarMenu() {
+  const botao = document.querySelector(".menu-button");
+  const menu = document.querySelector(".main-nav");
+  const compacto = window.matchMedia("(max-width: 760px)");
 
-  // Exibe o estado vazio quando não houver resultados
-  if (objetosFiltrados.length === 0) {
-    emptyState.classList.remove("hidden");
-    itemsGrid.classList.add("hidden");
-  } else {
-    emptyState.classList.add("hidden");
-    itemsGrid.classList.remove("hidden");
+  function atualizarMenu(aberto) {
+    botao.setAttribute("aria-expanded", String(aberto));
+    menu.toggleAttribute("data-open", aberto);
   }
+
+  botao.addEventListener("click", () => atualizarMenu(!menu.hasAttribute("data-open")));
+  compacto.addEventListener("change", () => atualizarMenu(false));
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && menu.hasAttribute("data-open")) {
+      atualizarMenu(false);
+      botao.focus();
+    }
+  });
 }
 
-// Pesquisa
-searchForm.addEventListener("submit", (event) => {
-  event.preventDefault();
+function iniciarArquivo(arquivo) {
+  const pesquisa = document.getElementById("archive-search");
+  const categoriasFiltro = document.getElementById("category-filters");
+  const local = document.getElementById("location-filter");
+  const lista = document.getElementById("records");
+  const contador = document.getElementById("result-count");
+  const vazio = document.getElementById("empty-state");
+  const modelo = document.getElementById("record-template");
+  const dialogo = document.getElementById("record-details");
+  const avisoFiltros = document.createElement("p");
+  avisoFiltros.role = "status";
+  arquivo.querySelector(".filters").append(avisoFiltros);
 
-  termoBusca = searchInput.value.trim();
+  const mais = document.createElement("button");
+  mais.type = "button";
+  mais.className = "button load-more";
+  mais.textContent = "Carregar mais";
+  mais.hidden = true;
+  lista.after(mais);
 
-  renderizarObjetos();
+  let categoria = "";
+  let buscaPendente;
+  let carregamento;
+  let detalhes;
 
-  document.getElementById("objetos").scrollIntoView({
-    behavior: "smooth"
-  });
-});
+  function numeroFicha(id) {
+    return "Nº " + String(id).padStart(4, "0");
+  }
 
-// Pesquisa atualiza enquanto o usuário digita
-searchInput.addEventListener("input", () => {
-  termoBusca = searchInput.value.trim();
-  renderizarObjetos();
-});
+  async function abrirDetalhes(id) {
+    detalhes?.abort();
+    const controle = new AbortController();
+    detalhes = controle;
+    const campos = dialogo.querySelector(".details-meta");
+    const titulo = document.getElementById("details-title");
+    const descricao = document.getElementById("details-description");
+    document.getElementById("details-number").textContent = numeroFicha(id);
+    titulo.textContent = "Carregando ficha…";
+    descricao.textContent = "";
+    campos.hidden = true;
+    dialogo.showModal();
 
-// Filtros: todos, perdidos e encontrados
-filterTabs.forEach((button) => {
-  button.addEventListener("click", () => {
-    filtroTipo = button.dataset.filter;
+    try {
+      const registro = await consultarAPI("/objetos/" + id, controle.signal);
+      if (controle.signal.aborted) return;
+      titulo.textContent = registro.titulo || "Objeto sem título";
+      descricao.textContent = registro.descricao || "Sem descrição.";
+      document.getElementById("details-type").textContent = tipoTexto(registro.tipo);
+      document.getElementById("details-category").textContent = registro.categoria || "—";
+      document.getElementById("details-location").textContent = registro.local || "—";
+      document.getElementById("details-date").textContent = formatarData(registro.data_ocorrencia);
+      campos.hidden = false;
+    } catch {
+      if (!controle.signal.aborted) titulo.textContent = "Não foi possível carregar a ficha.";
+    }
+  }
 
-    filterTabs.forEach((tab) => {
-      tab.classList.toggle("active", tab === button);
+  dialogo.addEventListener("close", () => detalhes?.abort());
+
+  function criarFicha(registro) {
+    const ficha = modelo.content.cloneNode(true);
+    const botao = ficha.querySelector(".record-open");
+    const titulo = registro.titulo || "Objeto sem título";
+    ficha.querySelector(".record-number").textContent = numeroFicha(registro.id_objeto);
+    ficha.querySelector(".record-title").textContent = titulo;
+    ficha.querySelector(".record-location").textContent = registro.local || "—";
+    preencherTipo(ficha.querySelector(".record-type"), registro.tipo);
+    const data = ficha.querySelector("time");
+    if (registro.data_ocorrencia) data.dateTime = registro.data_ocorrencia;
+    data.textContent = formatarData(registro.data_ocorrencia);
+    botao.setAttribute("aria-label", "Ver ficha: " + titulo);
+    botao.addEventListener("click", () => abrirDetalhes(registro.id_objeto));
+    return ficha;
+  }
+
+  function selecionarCategoria(id) {
+    categoria = id;
+    categoriasFiltro.querySelectorAll("button").forEach((botao) => {
+      botao.setAttribute("aria-pressed", String(botao.value === categoria));
     });
+    atualizar();
+  }
 
-    renderizarObjetos();
-  });
-});
-
-// Filtro por categoria
-categoryFilter.addEventListener("change", () => {
-  filtroCategoria = categoryFilter.value;
-
-  renderizarObjetos();
-});
-
-// Categorias rápidas
-quickCategories.forEach((button) => {
-  button.addEventListener("click", () => {
-    filtroCategoria = button.dataset.category;
-    categoryFilter.value = filtroCategoria;
-
-    renderizarObjetos();
-
-    document.getElementById("objetos").scrollIntoView({
-      behavior: "smooth"
-    });
-  });
-});
-
-// Limpa todos os filtros
-clearFiltersButton.addEventListener("click", () => {
-  filtroTipo = "todos";
-  filtroCategoria = "todas";
-  termoBusca = "";
-
-  searchInput.value = "";
-  categoryFilter.value = "todas";
-
-  filterTabs.forEach((tab) => {
-    tab.classList.toggle(
-      "active",
-      tab.dataset.filter === "todos"
-    );
+  Promise.allSettled([consultarAPI("/categorias"), consultarAPI("/locais")]).then(([categorias, locais]) => {
+    if (categorias.status === "fulfilled") {
+      for (const registro of categorias.value) {
+        const botao = document.createElement("button");
+        botao.type = "button";
+        botao.value = registro.id_categoria;
+        botao.textContent = registro.nome || "Categoria sem nome";
+        botao.setAttribute("aria-pressed", "false");
+        botao.addEventListener("click", () => selecionarCategoria(categoria === botao.value ? "" : botao.value));
+        categoriasFiltro.append(botao);
+      }
+      if (!categorias.value.length) categoriasFiltro.textContent = "Nenhuma categoria cadastrada.";
+    }
+    if (locais.status === "fulfilled") preencherOpcoes(local, locais.value, "id_local");
+    if (categorias.status === "rejected" || locais.status === "rejected") {
+      avisoFiltros.textContent = "Alguns filtros não puderam ser carregados.";
+    }
   });
 
-  renderizarObjetos();
-});
+  async function atualizar(proximaPagina = 1) {
+    clearTimeout(buscaPendente);
+    carregamento?.abort();
+    const controle = new AbortController();
+    carregamento = controle;
+    const params = new URLSearchParams({ pagina: String(proximaPagina) });
+    const filtros = {
+      busca: pesquisa.value.trim(),
+      tipo: arquivo.querySelector('[name="tipo"]:checked').value,
+      id_categoria: categoria,
+      id_local: local.value
+    };
+    for (const [chave, valor] of Object.entries(filtros)) {
+      if (valor) params.set(chave, valor);
+    }
 
-// Botão de detalhes
-// Por enquanto, mostra uma mensagem de demonstração.
-// Depois vamos criar a página de detalhes do objeto.
-itemsGrid.addEventListener("click", (event) => {
-  const button = event.target.closest("[data-item-id]");
+    if (proximaPagina === 1) lista.replaceChildren();
+    contador.textContent = "Carregando registros…";
+    vazio.hidden = true;
+    mais.disabled = true;
+    if (proximaPagina === 1) mais.hidden = true;
 
-  if (!button) return;
+    try {
+      const resultado = await consultarAPI("/objetos?" + params, controle.signal);
+      if (controle.signal.aborted) return;
+      lista.append(...resultado.dados.map(criarFicha));
+      mais.dataset.pagina = String(resultado.pagina + 1);
+      mais.textContent = "Carregar mais";
+      const quantidade = lista.childElementCount;
+      contador.textContent = quantidade + (quantidade === 1 ? " registro exibido" : " registros exibidos");
+      vazio.hidden = quantidade > 0;
+      mais.hidden = !resultado.temProximaPagina;
+    } catch {
+      if (!controle.signal.aborted) {
+        contador.textContent = "Não foi possível carregar os registros.";
+        mais.dataset.pagina = String(proximaPagina);
+        mais.textContent = "Tentar novamente";
+        mais.hidden = false;
+      }
+    } finally {
+      if (!controle.signal.aborted) mais.disabled = false;
+    }
+  }
 
-  const itemId = Number(button.dataset.itemId);
-
-  const objeto = objetos.find((item) => item.id === itemId);
-
-  if (!objeto) return;
-
-  alert(
-    `Objeto: ${objeto.titulo}\n` +
-    `Status: ${objeto.tipo}\n` +
-    `Categoria: ${objeto.categoria}\n` +
-    `Local: ${objeto.local}\n\n` +
-    `A página de detalhes será implementada em uma próxima etapa.`
-  );
-});
-
-// Menu mobile
-menuToggle.addEventListener("click", () => {
-  const menuAberto = mainNav.classList.toggle("open");
-
-  menuToggle.setAttribute(
-    "aria-expanded",
-    String(menuAberto)
-  );
-
-  menuToggle.setAttribute(
-    "aria-label",
-    menuAberto ? "Fechar menu" : "Abrir menu"
-  );
-});
-
-// Fecha o menu após clicar em um link
-mainNav.querySelectorAll(".nav-link").forEach((link) => {
-  link.addEventListener("click", () => {
-    mainNav.classList.remove("open");
-
-    menuToggle.setAttribute("aria-expanded", "false");
-    menuToggle.setAttribute("aria-label", "Abrir menu");
+  mais.addEventListener("click", () => atualizar(Number(mais.dataset.pagina)));
+  document.getElementById("search-form").addEventListener("submit", (event) => {
+    event.preventDefault();
+    atualizar();
   });
+  pesquisa.maxLength = 150;
+  pesquisa.addEventListener("input", () => {
+    clearTimeout(buscaPendente);
+    carregamento?.abort();
+    mais.disabled = true;
+    buscaPendente = setTimeout(atualizar, 250);
+  });
+  arquivo.querySelector(".type-filters").addEventListener("change", () => atualizar());
+  local.addEventListener("change", () => atualizar());
+  document.getElementById("reset-filters").addEventListener("click", () => {
+    pesquisa.value = "";
+    local.value = "";
+    arquivo.querySelector('[name="tipo"][value=""]').checked = true;
+    selecionarCategoria("");
+    pesquisa.focus();
+  });
+  atualizar();
+}
+
+function iniciarConta(formulario) {
+  const opcoes = document.querySelectorAll("[data-account]");
+  const campoNome = document.getElementById("account-name");
+  const nome = campoNome.querySelector("input");
+  const senha = formulario.elements.senha;
+  const botao = document.getElementById("account-submit");
+  const aviso = document.getElementById("account-feedback");
+
+  opcoes.forEach((opcao) => opcao.addEventListener("click", () => {
+    const cadastro = opcao.dataset.account === "signup";
+    opcoes.forEach((outra) => outra.setAttribute("aria-pressed", String(outra === opcao)));
+    campoNome.hidden = !cadastro;
+    nome.disabled = !cadastro;
+    nome.required = cadastro;
+    senha.autocomplete = cadastro ? "new-password" : "current-password";
+    senha.value = "";
+    botao.textContent = cadastro ? "Criar conta" : "Entrar";
+    aviso.textContent = "";
+  }));
+
+  formulario.addEventListener("submit", (event) => {
+    event.preventDefault();
+    senha.value = "";
+    aviso.textContent = "A área de conta ainda não está conectada ao servidor.";
+  });
+}
+
+function iniciarRegistro(formulario) {
+  const previa = document.getElementById("register-preview");
+  const campos = formulario.elements;
+  const imagem = previa.querySelector("img");
+  const semFoto = previa.querySelector(".no-photo");
+  const aviso = document.getElementById("register-feedback");
+  const dicaFoto = document.getElementById("photo-hint");
+  let fotoUrl;
+
+  const botaoPublicar = formulario.querySelector('[type="submit"]');
+  botaoPublicar.disabled = true;
+  campos.categoria.disabled = true;
+  campos.local.disabled = true;
+  aviso.textContent = "Carregando categorias e locais…";
+
+  Promise.all([consultarAPI("/categorias"), consultarAPI("/locais")]).then(([categorias, locais]) => {
+    campos.categoria.append(new Option("Selecione uma categoria", ""));
+    campos.local.append(new Option("Selecione um local", ""));
+    preencherOpcoes(campos.categoria, categorias, "id_categoria");
+    preencherOpcoes(campos.local, locais, "id_local");
+    campos.categoria.disabled = categorias.length === 0;
+    campos.local.disabled = locais.length === 0;
+    botaoPublicar.disabled = !categorias.length || !locais.length;
+    aviso.textContent = botaoPublicar.disabled
+      ? "Cadastre categorias e locais no banco para preencher a ficha."
+      : "A ficha pode ser visualizada antes da publicação.";
+    atualizar();
+  }).catch(() => {
+    aviso.textContent = "Não foi possível carregar categorias e locais. Recarregue a página para tentar novamente.";
+  });
+
+  const hoje = new Date();
+  campos.data.value = [
+    hoje.getFullYear(), String(hoje.getMonth() + 1).padStart(2, "0"), String(hoje.getDate()).padStart(2, "0")
+  ].join("-");
+  campos.data.max = campos.data.value;
+
+  function atualizar() {
+    preencherTipo(previa.querySelector(".record-type"), campos.tipo.value);
+    previa.querySelector(".record-title").textContent = campos.titulo.value.trim() || "Nome do objeto";
+    previa.querySelector('[data-preview="local"]').textContent = campos.local.value ? campos.local.selectedOptions[0].textContent : "—";
+    previa.querySelector('[data-preview="data"]').textContent = formatarData(campos.data.value);
+    previa.querySelector('[data-preview="categoria"]').textContent = campos.categoria.value ? campos.categoria.selectedOptions[0].textContent : "—";
+    previa.querySelector('[data-preview="cor"]').textContent = campos.cor.value.trim() || "—";
+  }
+
+  function limparFoto() {
+    if (fotoUrl) URL.revokeObjectURL(fotoUrl);
+    fotoUrl = undefined;
+    imagem.removeAttribute("src");
+    imagem.hidden = true;
+    semFoto.hidden = false;
+    dicaFoto.textContent = "JPG ou PNG, até 5 MB.";
+  }
+
+  campos.foto.addEventListener("change", () => {
+    limparFoto();
+    const arquivo = campos.foto.files[0];
+    if (!arquivo) return;
+    if (!["image/jpeg", "image/png"].includes(arquivo.type) || arquivo.size > 5 * 1024 * 1024) {
+      campos.foto.value = "";
+      aviso.textContent = "Escolha uma imagem JPG ou PNG de até 5 MB.";
+      return;
+    }
+    fotoUrl = URL.createObjectURL(arquivo);
+    imagem.src = fotoUrl;
+    imagem.hidden = false;
+    semFoto.hidden = true;
+    dicaFoto.textContent = arquivo.name;
+  });
+
+  imagem.addEventListener("error", () => {
+    campos.foto.value = "";
+    limparFoto();
+    aviso.textContent = "Não foi possível abrir a foto selecionada.";
+  });
+
+  formulario.addEventListener("input", atualizar);
+  formulario.addEventListener("submit", (event) => {
+    event.preventDefault();
+    aviso.textContent = "Prévia pronta. A publicação será disponibilizada quando a API estiver integrada.";
+  });
+  atualizar();
+}
+
+document.querySelectorAll("[data-year]").forEach((elemento) => {
+  elemento.textContent = new Date().getFullYear();
 });
+iniciarMenu();
 
-// Ano atualizado automaticamente no rodapé
-document.getElementById("currentYear").textContent =
-  new Date().getFullYear();
-
-// Inicializa a página
-renderizarObjetos();
+const arquivo = document.getElementById("archive");
+const conta = document.getElementById("account-form");
+const registro = document.getElementById("register-form");
+if (arquivo) iniciarArquivo(arquivo);
+if (conta) iniciarConta(conta);
+if (registro) iniciarRegistro(registro);

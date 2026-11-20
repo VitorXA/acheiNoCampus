@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: achei-no-campus
+    runtime: node
+    plan: free
+    buildCommand: npm --prefix back-end ci
+    startCommand: npm --prefix back-end start
+    healthCheckPath: /api/saude
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false

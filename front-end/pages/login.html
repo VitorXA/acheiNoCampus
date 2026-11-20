@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Arquivo de objetos perdidos e encontrados do IFCE — Campus Fortaleza.">
+  <title>Entrar | AcheiNoCampus</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="../js/script.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#conteudo">Ir para o conteúdo</a>
+<header class="site-header">
+  <div class="container header-inner">
+    <a class="brand" href="../index.html"><img src="../acheinocampus-logo-transparente-branca.png" alt="AcheiNoCampus" width="148" height="44"></a>
+    <button class="menu-button" type="button" aria-expanded="false" aria-controls="main-nav">Menu</button>
+    <nav id="main-nav" class="main-nav" aria-label="Navegação principal">
+      <a href="../index.html">Arquivo</a>
+      <a href="../pages/como-funciona.html">Como funciona</a>
+      <a class="nav-account" href="../pages/login.html" aria-current="page">Entrar</a>
+      <a class="nav-register" href="../pages/cadastrar-objeto.html"><span aria-hidden="true">+</span> Registrar objeto</a>
+    </nav>
+  </div>
+</header>
+<main class="account" id="conteudo">
+  <section class="account-intro">
+    <p class="eyebrow">Área do usuário</p>
+    <h1>Cada ficha<br>é uma pista.</h1>
+    <p>Com uma conta, você poderá registrar objetos e acompanhar suas fichas no arquivo.</p>
+  </section>
+  <section class="account-panel" aria-label="Acesso ao AcheiNoCampus">
+    <div class="account-content">
+      <div class="account-switch" role="group" aria-label="Tipo de acesso">
+        <button type="button" data-account="login" aria-pressed="true">Entrar</button>
+        <button type="button" data-account="signup" aria-pressed="false">Criar conta</button>
+      </div>
+      <form id="account-form" method="post">
+        <label class="field" id="account-name" hidden><span class="eyebrow">Nome</span><input name="nome" maxlength="45" autocomplete="name" disabled></label>
+        <label class="field"><span class="eyebrow">E-mail</span><input name="email" type="email" placeholder="voce@email.com" autocomplete="email" required></label>
+        <label class="field"><span class="eyebrow">Senha</span><input name="senha" type="password" placeholder="Sua senha" autocomplete="current-password" required></label>
+        <button class="button" id="account-submit" type="submit">Entrar</button>
+        <p class="form-feedback" id="account-feedback" role="status"></p>
+      </form>
+      <p class="account-note">Só quer procurar um objeto? <a href="../index.html">O arquivo é aberto, sem login.</a></p>
+    </div>
+  </section>
+</main>
+<footer class="site-footer">
+  <div class="container footer-grid">
+    <div><a class="brand" href="../index.html"><img src="../acheinocampus-logo-transparente-branca.png" alt="AcheiNoCampus" width="124" height="37"></a><p>Um arquivo colaborativo de objetos perdidos e encontrados no IFCE — Campus Fortaleza. Feito pela comunidade, para a comunidade.</p></div>
+    <nav aria-label="Links do rodapé"><h2 class="eyebrow">Navegar</h2><a href="../index.html">Arquivo de objetos</a><a href="../pages/cadastrar-objeto.html">Registrar objeto</a><a href="../pages/como-funciona.html">Como funciona</a><a href="../pages/login.html">Entrar ou criar conta</a></nav>
+    <div><h2 class="eyebrow">Ficha técnica</h2><dl><dt>Instituição</dt><dd>IFCE — Campus Fortaleza</dd><dt>Projeto</dt><dd>Acadêmico, sem fins lucrativos</dd></dl></div>
+  </div>
+  <div class="footer-bottom"><div class="container eyebrow"><span>© <span data-year>2026</span> AcheiNoCampus</span><span>Objetos têm histórias.</span></div></div>
+</footer>
+</body>
+</html>

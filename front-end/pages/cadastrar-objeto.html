@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Arquivo de objetos perdidos e encontrados do IFCE — Campus Fortaleza.">
+  <title>Registrar objeto | AcheiNoCampus</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="../js/script.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#conteudo">Ir para o conteúdo</a>
+<header class="site-header">
+  <div class="container header-inner">
+    <a class="brand" href="../index.html"><img src="../acheinocampus-logo-transparente-branca.png" alt="AcheiNoCampus" width="148" height="44"></a>
+    <button class="menu-button" type="button" aria-expanded="false" aria-controls="main-nav">Menu</button>
+    <nav id="main-nav" class="main-nav" aria-label="Navegação principal">
+      <a href="../index.html">Arquivo</a>
+      <a href="../pages/como-funciona.html">Como funciona</a>
+      <a class="nav-account" href="../pages/login.html">Entrar</a>
+      <a class="nav-register" href="../pages/cadastrar-objeto.html" aria-current="page"><span aria-hidden="true">+</span> Registrar objeto</a>
+    </nav>
+  </div>
+</header>
+<main class="register-page" id="conteudo">
+  <div class="container">
+    <div class="register-heading"><p class="eyebrow accent">Nova ficha</p><h1>Registrar <span>objeto.</span></h1></div>
+    <div class="register-layout">
+      <form class="register-form" id="register-form" method="post">
+        <section><h2><span class="eyebrow accent">01</span> O que aconteceu?</h2>
+          <fieldset class="field-pair type-options"><legend class="sr-only">Tipo de registro</legend>
+            <label><input type="radio" name="tipo" value="encontrado" checked><span>Encontrei <small>algo que não é meu</small></span></label>
+            <label><input type="radio" name="tipo" value="perdido"><span>Perdi <small>algo meu no campus</small></span></label>
+          </fieldset>
+        </section>
+        <section><h2><span class="eyebrow accent">02</span> Que objeto é?</h2>
+          <label class="field"><span class="eyebrow">Nome do objeto</span><input name="titulo" maxlength="45" placeholder="Ex.: Garrafa térmica azul" required></label>
+          <div class="field-pair">
+            <label class="field"><span class="eyebrow">Categoria</span><select name="categoria" required></select></label>
+            <label class="field"><span class="eyebrow">Cor</span><input name="cor" maxlength="45" placeholder="Ex.: azul-marinho"></label>
+          </div>
+        </section>
+        <section><h2><span class="eyebrow accent">03</span> Onde e quando?</h2>
+          <div class="field-pair">
+            <label class="field"><span class="eyebrow">Local</span><select name="local" required></select></label>
+            <label class="field"><span class="eyebrow">Data</span><input name="data" type="date" required></label>
+          </div>
+        </section>
+        <section><h2><span class="eyebrow accent">04</span> Detalhes</h2>
+          <label class="field"><span class="eyebrow">Descrição</span><textarea name="descricao" rows="4" placeholder="Marcas ou adesivos. Guarde um detalhe para confirmar quem é o dono."></textarea></label>
+          <label class="upload"><span>Adicionar foto <small id="photo-hint">JPG ou PNG, até 5 MB.</small></span><input class="sr-only" name="foto" type="file" accept="image/jpeg,image/png" aria-describedby="photo-hint"></label>
+        </section>
+        <div class="register-actions"><p id="register-feedback" role="status">A ficha pode ser visualizada antes da publicação.</p><button type="submit" class="button">Publicar ficha</button></div>
+      </form>
+      <aside class="preview"><h2 class="eyebrow">Prévia da ficha</h2>
+        <article class="record preview-record" id="register-preview">
+          <div class="record-header"><span class="eyebrow record-number">Nova ficha</span><span class="eyebrow record-type"></span></div>
+          <div class="record-media"><span class="no-photo eyebrow">Sem foto</span><img alt="Foto selecionada para a ficha" hidden></div>
+          <div class="record-body"><h3 class="record-title">Nome do objeto</h3><dl class="record-meta">
+            <div><dt class="eyebrow">Local</dt><dd data-preview="local"></dd></div><div><dt class="eyebrow">Data</dt><dd data-preview="data"></dd></div>
+            <div><dt class="eyebrow">Categoria</dt><dd data-preview="categoria"></dd></div><div><dt class="eyebrow">Cor</dt><dd data-preview="cor"></dd></div>
+          </dl></div>
+        </article>
+      </aside>
+    </div>
+  </div>
+</main>
+<footer class="site-footer">
+  <div class="container footer-grid">
+    <div><a class="brand" href="../index.html"><img src="../acheinocampus-logo-transparente-branca.png" alt="AcheiNoCampus" width="124" height="37"></a><p>Um arquivo colaborativo de objetos perdidos e encontrados no IFCE — Campus Fortaleza. Feito pela comunidade, para a comunidade.</p></div>
+    <nav aria-label="Links do rodapé"><h2 class="eyebrow">Navegar</h2><a href="../index.html">Arquivo de objetos</a><a href="../pages/cadastrar-objeto.html">Registrar objeto</a><a href="../pages/como-funciona.html">Como funciona</a><a href="../pages/login.html">Entrar ou criar conta</a></nav>
+    <div><h2 class="eyebrow">Ficha técnica</h2><dl><dt>Instituição</dt><dd>IFCE — Campus Fortaleza</dd><dt>Projeto</dt><dd>Acadêmico, sem fins lucrativos</dd></dl></div>
+  </div>
+  <div class="footer-bottom"><div class="container eyebrow"><span>© <span data-year>2026</span> AcheiNoCampus</span><span>Objetos têm histórias.</span></div></div>
+</footer>
+</body>
+</html>
